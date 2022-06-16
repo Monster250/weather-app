@@ -1,60 +1,65 @@
-const app = document.querySelector('.weather-app');
-const temp = document.querySelector('.temp');
-const dateOutput = document.querySelector('.date');
-const timeOutput = document.querySelector('.time');
-const conditionOutput = document.querySelector('.condition');
-const nameOutput = document.querySelector('.name');
-const icon = document.querySelector('.icon');
-const cloudOutput = document.querySelector('.cloud');
-const humidityOutput = document.querySelector('.humidity');
-const windOutput = document.querySelector('.wind');
-const form = document.querySelector('.search');
-const btn = document.querySelector('.submit');
-const cities = document.querySelector('.city');
-let cityInput = 'Delhi';
-cities.forEach((city) => {
-    city.addEventListener('click', (e) => {
-        cityInput = e.target.innerHTML;
-        fetchWeatherData();
-        app.style.opacity = "0";
-    });
-})
-form.addEventListener('submit', (e) => {
-    if (search.value.length == 0) {
-        alert('Plese type in a city name');
-    } else {
-        cityInput = search.value;
-        fetchWeatherData();
-        search.value = "";
-        app.style.ocacity = "0";
-    }
-    e.preventDefault();
-});
+function GetInfo() {
 
-function dayOfTheWeek(day, month, year) {
-    const weekday = [
-        "Sunday",
-        "Monday",
-        "Tuesday",
-        "Wednesday",
-        "Thursday",
-        "Friday",
-        "Saturday"
-    ];
-    return weekday[new Date('${day}/${month}/${year}').getDay()];
-};
+    var newName = document.getElementById("cityInput");
+    var cityName = document.getElementById("cityName");
+    cityName.innerHTML = "--" + newName.value + "--";
 
-function fetchWeatherData() {
-    fetch('https: //api.openweathermap.org/data/2.5/onecall?lat=28.653950896263996&lon=77.24222959505828&exclude=minutely,alerts&appid=f2af32cfe68e746a68656bbdaf9c0135')
+    fetch('https://api.openweathermap.org/data/2.5/forecast?q=' + newName.value + '&appid=f2af32cfe68e746a68656bbdaf9c0135')
         .then(response => response.json())
         .then(data => {
-            console.log(data);
-            temp.innerHTML = data.current.temp_c + "&#176;";
-            conditionOutput.innerHTML = data.current.condition.text;
-            const date = date.location.localtime;
-            const y = parseInt(date.substr(0, 4));
-            const m = parseInt(date.substr(5, 2));
-            const d = parseInt(date.substr(8, 2));
-            const time = date.substr(11);
+
+            //Getting the min and max values for each day
+            for (i = 0; i < 5; i++) {
+                document.getElementById("day" + (i + 1) + "Min").innerHTML = "Min: " + Number(data.list[i].main.temp_min - 273.15).toFixed(1) + "°";
+                //Number(1.3450001).toFixed(2); // 1.35
+            }
+
+            for (i = 0; i < 5; i++) {
+                document.getElementById("day" + (i + 1) + "Max").innerHTML = "Max: " + Number(data.list[i].main.temp_max - 273.15).toFixed(2) + "°";
+            }
+            //------------------------------------------------------------
+            for (i = 0; i < 5; i++) {
+                document.getElementById("day" + (i + 1) + "hum").innerHTML = "humidity: " + Number(data.list[i].main.humidity).toFixed(2);
+            }
+            for (i = 0; i < 5; i++) {
+                document.getElementById("day" + (i + 1) + "wind").innerHTML = "wind-speed: " + Number(data.list[i].wind.speed);
+            }
+            //Getting Weather Icons
+            for (i = 0; i < 5; i++) {
+                document.getElementById("img" + (i + 1)).src = "http://openweathermap.org/img/wn/" +
+                    data.list[i].weather[0].icon +
+                    ".png";
+            }
+            //------------------------------------------------------------
+            console.log(data)
+
+
         })
+
+    .catch(err => alert("Something Went Wrong: Try Checking Your Internet Coneciton"))
+}
+
+function DefaultScreen() {
+    document.getElementById("cityInput").defaultValue = "Delhi";
+    GetInfo();
+}
+
+
+//Getting and displaying the text for the upcoming five days of the week
+var d = new Date();
+var weekday = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", ];
+
+var barColors = ["red", "green", "blue", "orange", "brown"];
+
+//Function to get the correct integer for the index of the days array
+function CheckDay(day) {
+    if (day + d.getDay() > 6) {
+        return day + d.getDay() - 7;
+    } else {
+        return day + d.getDay();
+    }
+}
+
+for (i = 0; i < 5; i++) {
+    document.getElementById("day" + (i + 1)).innerHTML = weekday[CheckDay(i)];
 }
